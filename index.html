@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タイミー収益分析ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+            border-left: 4px solid #667eea;
+            padding-left: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input[type="radio"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .results {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .result-label {
+            color: #555;
+            flex: 1;
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: #333;
+            text-align: right;
+            min-width: 120px;
+        }
+
+        .result-row.total {
+            border-top: 2px solid #667eea;
+            padding-top: 12px;
+            margin-top: 12px;
+            font-size: 18px;
+        }
+
+        .result-row.total .result-label {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .result-row.total .result-value {
+            color: #667eea;
+            font-size: 22px;
+        }
+
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .note-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .calculator {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .result-value {
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>💼 タイミー収益分析ツール</h1>
+        <p class="subtitle">経費・収益・生産性を総合的に分析</p>
+
+        <div class="section">
+            <div class="section-title">労働条件</div>
+            
+            <div class="input-group">
+                <label for="hourlyWage">時給（円）</label>
+                <input type="number" id="hourlyWage" value="1200" min="0" step="10">
+            </div>
+
+            <div class="input-group">
+                <label for="workHours">実働時間（時間）</label>
+                <input type="number" id="workHours" value="5" min="0" step="0.5">
+            </div>
+
+            <div class="input-group">
+                <label for="transportation">交通費（円）</label>
+                <input type="number" id="transportation" value="500" min="0" step="10">
+            </div>
+
+            <div class="input-group">
+                <label for="workers">ワーカー人数（月内初回振込）</label>
+                <input type="number" id="workers" value="1" min="1" step="1">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">売上見込</div>
+            
+            <div class="input-group">
+                <label>
+                    <input type="radio" name="revenueType" value="daily" checked> 
+                    1日あたりの売上見込
+                </label>
+                <label style="margin-top: 8px;">
+                    <input type="radio" name="revenueType" value="hourly"> 
+                    1時間あたりの売上見込
+                </label>
+            </div>
+
+            <div class="input-group">
+                <label for="revenue">売上見込（円）</label>
+                <input type="number" id="revenue" value="30000" min="0" step="1000">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">タイミー経費</div>
+            <div class="results">
+                <div class="result-row">
+                    <span class="result-label">労働報酬</span>
+                    <span class="result-value" id="laborCost">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">サービス利用料（賃金部分の30%・税抜）</span>
+                    <span class="result-value" id="serviceFee">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">サービス利用料の消費税（10%）</span>
+                    <span class="result-value" id="consumptionTax">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">振込手数料（税込220円×人数）</span>
+                    <span class="result-value" id="transferFee">¥0</span>
+                </div>
+                <div class="result-row total">
+                    <span class="result-label">総経費</span>
+                    <span class="result-value" id="total">¥0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">収益分析</div>
+            <div class="results" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+                <div class="result-row">
+                    <span class="result-label">総売上</span>
+                    <span class="result-value" id="totalRevenue">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">総経費</span>
+                    <span class="result-value" id="totalCost">¥0</span>
+                </div>
+                <div class="result-row total">
+                    <span class="result-label">営業利益</span>
+                    <span class="result-value" id="profit">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">利益率</span>
+                    <span class="result-value" id="profitRate">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">生産性指標</div>
+            <div class="results" style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);">
+                <div class="result-row">
+                    <span class="result-label">人時生産性（売上÷総労働時間）</span>
+                    <span class="result-value" id="laborProductivity">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">人時利益（利益÷総労働時間）</span>
+                    <span class="result-value" id="laborProfit">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">総労働時間</span>
+                    <span class="result-value" id="totalHours">0h</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">損益分岐点分析</div>
+            <div class="results" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                <div class="result-row">
+                    <span class="result-label">損益分岐点売上（1日あたり）</span>
+                    <span class="result-value" id="breakEvenDaily">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">損益分岐点売上（1時間あたり）</span>
+                    <span class="result-value" id="breakEvenHourly">¥0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">必要売上達成率</span>
+                    <span class="result-value" id="achievementRate">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            <div class="note-title">📌 計算方法について</div>
+            <div>
+                • サービス利用料は<strong>賃金部分（時給×実働時間）のみ</strong>に対して30%が課されます<br>
+                • 交通費はサービス利用料の計算対象外です<br>
+                • 別途、請求書の振込手数料（三井住友銀行宛など）が発生する場合があります
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatCurrency(value) {
+            return '¥' + Math.round(value).toLocaleString('ja-JP');
+        }
+
+        function formatPercent(value) {
+            return (value * 100).toFixed(1) + '%';
+        }
+
+        function calculate() {
+            // 入力値の取得
+            const hourlyWage = parseFloat(document.getElementById('hourlyWage').value) || 0;
+            const workHours = parseFloat(document.getElementById('workHours').value) || 0;
+            const transportation = parseFloat(document.getElementById('transportation').value) || 0;
+            const workers = parseInt(document.getElementById('workers').value) || 1;
+            const revenueInput = parseFloat(document.getElementById('revenue').value) || 0;
+            const revenueType = document.querySelector('input[name="revenueType"]:checked').value;
+
+            // タイミー経費の計算
+            const wagePart = hourlyWage * workHours; // 賃金部分のみ
+            const laborCost = wagePart + transportation; // 労働報酬
+            const serviceFee = wagePart * 0.3; // サービス利用料は賃金部分のみに対して30%
+            const consumptionTax = serviceFee * 0.1;
+            const transferFee = workers * 220;
+            const totalCost = laborCost + serviceFee + consumptionTax + transferFee;
+
+            // 売上の計算（1日あたりor1時間あたりを総売上に変換）
+            let totalRevenue;
+            if (revenueType === 'daily') {
+                totalRevenue = revenueInput;
+            } else { // hourly
+                totalRevenue = revenueInput * workHours;
+            }
+
+            // 収益分析
+            const profit = totalRevenue - totalCost;
+            const profitRate = totalRevenue > 0 ? profit / totalRevenue : 0;
+
+            // 生産性指標
+            const totalHours = workHours * workers;
+            const laborProductivity = totalHours > 0 ? totalRevenue / totalHours : 0;
+            const laborProfit = totalHours > 0 ? profit / totalHours : 0;
+
+            // 損益分岐点分析
+            const breakEvenDaily = totalCost;
+            const breakEvenHourly = workHours > 0 ? totalCost / workHours : 0;
+            const achievementRate = breakEvenDaily > 0 ? totalRevenue / breakEvenDaily : 0;
+
+            // タイミー経費の表示
+            document.getElementById('laborCost').textContent = formatCurrency(laborCost);
+            document.getElementById('serviceFee').textContent = formatCurrency(serviceFee);
+            document.getElementById('consumptionTax').textContent = formatCurrency(consumptionTax);
+            document.getElementById('transferFee').textContent = formatCurrency(transferFee);
+            document.getElementById('total').textContent = formatCurrency(totalCost);
+
+            // 収益分析の表示
+            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('totalCost').textContent = formatCurrency(totalCost);
+            document.getElementById('profit').textContent = formatCurrency(profit);
+            document.getElementById('profitRate').textContent = formatPercent(profitRate);
+
+            // 利益がマイナスの場合は赤色で表示
+            const profitElement = document.getElementById('profit');
+            if (profit < 0) {
+                profitElement.style.color = '#d32f2f';
+            } else {
+                profitElement.style.color = '#2e7d32';
+            }
+
+            // 生産性指標の表示
+            document.getElementById('laborProductivity').textContent = formatCurrency(laborProductivity) + '/h';
+            document.getElementById('laborProfit').textContent = formatCurrency(laborProfit) + '/h';
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1) + 'h';
+
+            // 損益分岐点の表示
+            document.getElementById('breakEvenDaily').textContent = formatCurrency(breakEvenDaily);
+            document.getElementById('breakEvenHourly').textContent = formatCurrency(breakEvenHourly) + '/h';
+            document.getElementById('achievementRate').textContent = formatPercent(achievementRate);
+
+            // 達成率が100%未満の場合は警告色で表示
+            const achievementElement = document.getElementById('achievementRate');
+            if (achievementRate < 1) {
+                achievementElement.style.color = '#d32f2f';
+            } else {
+                achievementElement.style.color = '#2e7d32';
+            }
+        }
+
+        // 初期計算
+        calculate();
+
+        // 入力値の変更時に再計算
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculate);
+            input.addEventListener('change', calculate);
+        });
+    </script>
+</body>
+</html>
