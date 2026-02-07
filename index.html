@@ -236,23 +236,23 @@
         </div>
 
         <div class="section">
-            <div class="section-title">収益分析</div>
-            <div class="results" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+            <div class="section-title">人件費率分析</div>
+            <div class="results" id="laborCostRatioSection" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
                 <div class="result-row">
                     <span class="result-label">総売上</span>
                     <span class="result-value" id="totalRevenue">¥0</span>
                 </div>
                 <div class="result-row">
-                    <span class="result-label">総経費</span>
+                    <span class="result-label">人件費（総経費）</span>
                     <span class="result-value" id="totalCost">¥0</span>
                 </div>
                 <div class="result-row total">
-                    <span class="result-label">営業利益</span>
-                    <span class="result-value" id="profit">¥0</span>
+                    <span class="result-label">人件費率</span>
+                    <span class="result-value" id="laborCostRatio">0%</span>
                 </div>
-                <div class="result-row">
-                    <span class="result-label">利益率</span>
-                    <span class="result-value" id="profitRate">0%</span>
+                <div class="result-row" style="margin-top: 15px; padding: 12px; background: white; border-radius: 8px;">
+                    <span class="result-label" style="font-weight: 600;">判定</span>
+                    <span class="result-value" id="laborCostStatus" style="font-size: 16px; font-weight: 700;">-</span>
                 </div>
             </div>
         </div>
@@ -294,11 +294,17 @@
         </div>
 
         <div class="note">
-            <div class="note-title">📌 計算方法について</div>
+            <div class="note-title">📌 計算方法と判定基準</div>
             <div>
+                <strong>計算方法:</strong><br>
                 • サービス利用料は<strong>賃金部分（時給×実働時間）のみ</strong>に対して30%が課されます<br>
                 • 交通費はサービス利用料の計算対象外です<br>
-                • 別途、請求書の振込手数料（三井住友銀行宛など）が発生する場合があります
+                • 人件費率 = 人件費 ÷ 売上 × 100<br><br>
+                <strong>人件費率の判定基準:</strong><br>
+                • 〜30%未満: ✅ 安全（理想的な水準）<br>
+                • 30〜40%: ⚠️ 注意（標準的だが改善の余地あり）<br>
+                • 40%以上: 🚨 要再考（高すぎる、見直しが必要）<br><br>
+                ※ 別途、請求書の振込手数料（三井住友銀行宛など）が発生する場合があります
             </div>
         </div>
     </div>
@@ -337,14 +343,29 @@
                 totalRevenue = revenueInput * workHours;
             }
 
-            // 収益分析
-            const profit = totalRevenue - totalCost;
-            const profitRate = totalRevenue > 0 ? profit / totalRevenue : 0;
+            // 人件費率分析
+            const laborCostRatio = totalRevenue > 0 ? (totalCost / totalRevenue) : 0;
+            
+            // 人件費率の判定
+            let status, statusColor, bgColor;
+            if (laborCostRatio < 0.30) {
+                status = '✅ 安全';
+                statusColor = '#2e7d32';
+                bgColor = 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)';
+            } else if (laborCostRatio < 0.40) {
+                status = '⚠️ 注意';
+                statusColor = '#f57c00';
+                bgColor = 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)';
+            } else {
+                status = '🚨 要再考';
+                statusColor = '#d32f2f';
+                bgColor = 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)';
+            }
 
             // 生産性指標
             const totalHours = workHours * workers;
             const laborProductivity = totalHours > 0 ? totalRevenue / totalHours : 0;
-            const laborProfit = totalHours > 0 ? profit / totalHours : 0;
+            const laborProfit = totalHours > 0 ? (totalRevenue - totalCost) / totalHours : 0;
 
             // 損益分岐点分析
             const breakEvenDaily = totalCost;
@@ -358,19 +379,16 @@
             document.getElementById('transferFee').textContent = formatCurrency(transferFee);
             document.getElementById('total').textContent = formatCurrency(totalCost);
 
-            // 収益分析の表示
+            // 人件費率分析の表示
             document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
             document.getElementById('totalCost').textContent = formatCurrency(totalCost);
-            document.getElementById('profit').textContent = formatCurrency(profit);
-            document.getElementById('profitRate').textContent = formatPercent(profitRate);
-
-            // 利益がマイナスの場合は赤色で表示
-            const profitElement = document.getElementById('profit');
-            if (profit < 0) {
-                profitElement.style.color = '#d32f2f';
-            } else {
-                profitElement.style.color = '#2e7d32';
-            }
+            document.getElementById('laborCostRatio').textContent = formatPercent(laborCostRatio);
+            document.getElementById('laborCostStatus').textContent = status;
+            document.getElementById('laborCostStatus').style.color = statusColor;
+            
+            // 背景色を判定に応じて変更
+            const laborCostRatioSection = document.getElementById('laborCostRatioSection');
+            laborCostRatioSection.style.background = bgColor;
 
             // 生産性指標の表示
             document.getElementById('laborProductivity').textContent = formatCurrency(laborProductivity) + '/h';
